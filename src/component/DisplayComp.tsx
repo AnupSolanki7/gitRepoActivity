@@ -1,11 +1,12 @@
 import axios from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import moment from "moment";
 import { useState } from "react";
 
 const DisplayComp = ({ api }: any) => {
   const [graph, setGraph] = useState(false);
-  const [weeklyData, setWeeklyData]:any = useState([])
+  const [weeklyData, setWeeklyData]: any = useState([]);
   const getCommitApi = () => {
     setGraph(!graph);
     if (!graph) {
@@ -20,13 +21,12 @@ const DisplayComp = ({ api }: any) => {
       axios
         .get(`https://api.github.com/repos/${api.full_name}/stats/contributors`)
         .then((res: any) => {
-            setWeeklyData(res.data);
+          setWeeklyData(res.data);
         });
     }
   };
 
   console.log(weeklyData);
-  
 
   const options = {
     title: {
@@ -35,7 +35,7 @@ const DisplayComp = ({ api }: any) => {
 
     series: [
       {
-        data: weeklyData?.weeks?.map((e:any) => e?.w),
+        data: weeklyData?.weeks?.map((e: any) => e?.w),
       },
     ],
   };
@@ -51,12 +51,10 @@ const DisplayComp = ({ api }: any) => {
     ],
   };
 
-  const newDate:any = new Date();
+  const newDate: any = new Date();
 
   const dateSubmited = newDate - Date.parse(api.created_at);
   const Days = Math.floor(dateSubmited / (1000 * 60 * 60 * 24));
-
-
 
   return (
     <div className="my-2 hover:bg-gray-300 p-4 rounded-xl bg-gray-400  cursor-pointer">
@@ -71,13 +69,16 @@ const DisplayComp = ({ api }: any) => {
             {api.owner.login}
           </p>
           <p className="font-mono text-sm text-left">{api.description}</p>
-          <p className="flex font-semibold">
-            Issues reported :-{" "}
-            <span className="text-black">{api.open_issues}</span>
-          </p>
-          <p className="flex font-semibold">
-            Star count-{" "}
-            <span className="text-red-400">{api.stargazers_count}</span>
+          <p className="flex font-semibold gap-8">
+            <span>
+              Issues reported :-{" "}
+              <span className="text-black">{api.open_issues}</span>
+            </span>
+            <span>
+              Star count-{" "}
+              <span className="text-red-400">{api.stargazers_count}</span>
+            </span>
+          <p className="font-normal" > Last pushed {moment(api.created_at).fromNow()} from now</p>
           </p>
         </div>
       </div>
