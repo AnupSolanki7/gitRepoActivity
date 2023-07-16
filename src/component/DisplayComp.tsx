@@ -1,12 +1,15 @@
 import axios from "axios";
-import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
-import {IoIosArrowDown, IoIosArrowForward} from "react-icons/io"
+import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import moment from "moment";
 import { useState } from "react";
+import LineChart from "./LineChart";
+import { Button, Menu, MenuItem, Popover } from "@mui/material";
 
 const DisplayComp = ({ api }: any) => {
   const [graph, setGraph] = useState(false);
+  const [open,setOpen] = useState(false)
+  const [changeData, setChangeData] = useState("")
   const [weeklyData, setWeeklyData]: any = useState([]);
   const getCommitApi = () => {
     setGraph(!graph);
@@ -16,7 +19,7 @@ const DisplayComp = ({ api }: any) => {
           `https://api.github.com/repos/${api.full_name}/stats/commit_activity`
         )
         .then((res: any) => {
-            setWeeklyData(res.data);
+          setWeeklyData(res?.data);
         });
 
       axios
@@ -25,30 +28,6 @@ const DisplayComp = ({ api }: any) => {
           setWeeklyData(res.data);
         });
     }
-  };
-
-
-
-  const options = {
-    title: {
-      text: "Total Changes",
-    },
-    yAxis: {
-        title: {
-            text: 'change'
-        }
-    },
-
-    xAxis: {
-        title: {
-            text: 'week'
-        }
-    },
-    series: [
-        {
-          data: [1, 2, 3],
-        },
-      ],
   };
 
   const optionsContri = {
@@ -61,6 +40,11 @@ const DisplayComp = ({ api }: any) => {
       },
     ],
   };
+
+  const HandleChangeStatus = (change:any) => {
+    setChangeData(change)
+    setOpen(false)
+  }
 
   const newDate: any = new Date();
 
@@ -79,11 +63,20 @@ const DisplayComp = ({ api }: any) => {
           <p className="text-left font-mono font-semibold text-lg">
             {api.name}
           </p>
-          <p className="font-mono text-sm text-left flex justify-between items-center">{api.description} 
-          <span className="absolute right-6 top-2" >
-            
-          {!graph ? <span className="text-xl" > <IoIosArrowForward/> </span> : <span className="text-xl" ><IoIosArrowDown/></span> }
-          </span>
+          <p className="font-mono text-sm text-left flex justify-between items-center">
+            {api.description}
+            <span className="absolute right-6 top-2">
+              {!graph ? (
+                <span className="text-xl">
+                  {" "}
+                  <IoIosArrowForward />{" "}
+                </span>
+              ) : (
+                <span className="text-xl">
+                  <IoIosArrowDown />
+                </span>
+              )}
+            </span>
           </p>
           <p className="flex font-semibold gap-8">
             <span>
@@ -94,26 +87,45 @@ const DisplayComp = ({ api }: any) => {
               Star count-{" "}
               <span className="text-red-400">{api.stargazers_count}</span>
             </span>
-          <p className="font-normal" > Last pushed {moment(api.created_at).fromNow()} by {api.owner.login}</p>
+            <p className="font-normal">
+              {" "}
+              Last pushed {moment(api.created_at).fromNow()} by{" "}
+              {api.owner.login}
+            </p>
           </p>
         </div>
       </div>
       {graph ? (
         <div className="h-max my-4 bg-white">
-          <div className="py-2">
-            <HighchartsReact
-              className="h-full"
-              highcharts={Highcharts}
-              options={options}
-            />
-          </div>
+          <Button
+            id="basic-button"
+            aria-controls={open ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            onClick={() => setOpen(true)}
+          >
+            Dashboard
+          </Button>
+          <Menu
+            id="basic-menu"
+            open={open}
+            onClose={() => setOpen(false)}
+            MenuListProps={{
+              "aria-labelledby": "basic-button",
+            }}
+          >
+            <MenuItem onClick={(e:any) => HandleChangeStatus("a")}>Profile</MenuItem>
+            <MenuItem onClick={(e:any) => HandleChangeStatus("d")}>My account</MenuItem>
+            <MenuItem onClick={(e:any) => HandleChangeStatus("c")}>Logout</MenuItem>
+          </Menu>
+          <LineChart weeklyData={weeklyData} />
           <div className="h-4 bg-gray-400" />
           <div className="py-2">
-            <HighchartsReact
+            {/* <HighchartsReact
               className="h-full"
               highcharts={Highcharts}
               options={optionsContri}
-            />
+            /> */}
           </div>
         </div>
       ) : null}
