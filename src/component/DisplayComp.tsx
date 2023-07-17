@@ -1,4 +1,5 @@
 import axios from "axios";
+import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import moment from "moment";
@@ -8,9 +9,10 @@ import { Button, Menu, MenuItem, Popover } from "@mui/material";
 
 const DisplayComp = ({ api }: any) => {
   const [graph, setGraph] = useState(false);
-  const [open,setOpen] = useState(false)
-  const [changeData, setChangeData] = useState("")
+  const [open, setOpen] = useState(false);
+  const [changeData, setChangeData] = useState("a");
   const [weeklyData, setWeeklyData]: any = useState([]);
+  const [allWeekData, setAllWeekData]: any = useState([]);
   const getCommitApi = () => {
     setGraph(!graph);
     if (!graph) {
@@ -19,7 +21,7 @@ const DisplayComp = ({ api }: any) => {
           `https://api.github.com/repos/${api.full_name}/stats/commit_activity`
         )
         .then((res: any) => {
-          setWeeklyData(res?.data);
+          setAllWeekData(res?.data);
         });
 
       axios
@@ -34,22 +36,24 @@ const DisplayComp = ({ api }: any) => {
     title: {
       text: "Contributor Changes",
     },
+    yAxis: {
+      title: {
+          text: 'changes'
+      }
+  },
     series: [
       {
-        data: [1, 2, 3],
+        name:"week",
+        data: allWeekData?.map((e: any) => e.total),
       },
     ],
   };
 
-  const HandleChangeStatus = (change:any) => {
-    setChangeData(change)
-    setOpen(false)
-  }
-
-  const newDate: any = new Date();
-
-  const dateSubmited = newDate - Date.parse(api.created_at);
-  const Days = Math.floor(dateSubmited / (1000 * 60 * 60 * 24));
+  const HandleChangeStatus = (change: any) => {
+    setChangeData(change);
+    setOpen(false);
+  };
+ 
 
   return (
     <div className="my-2 hover:bg-gray-300 p-4 rounded-xl bg-gray-400  cursor-pointer relative">
@@ -96,37 +100,43 @@ const DisplayComp = ({ api }: any) => {
         </div>
       </div>
       {graph ? (
-        <div className="h-max my-4 bg-white">
-          <Button
-            id="basic-button"
-            aria-controls={open ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? "true" : undefined}
-            onClick={() => setOpen(true)}
-          >
-            Dashboard
-          </Button>
-          <Menu
-            id="basic-menu"
+        <div className="h-max my-4 bg-white ">
+          
+          <Popover
+            id={"1"}
             open={open}
             onClose={() => setOpen(false)}
-            MenuListProps={{
-              "aria-labelledby": "basic-button",
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
             }}
           >
-            <MenuItem onClick={(e:any) => HandleChangeStatus("a")}>Profile</MenuItem>
-            <MenuItem onClick={(e:any) => HandleChangeStatus("d")}>My account</MenuItem>
-            <MenuItem onClick={(e:any) => HandleChangeStatus("c")}>Logout</MenuItem>
-          </Menu>
-          <LineChart weeklyData={weeklyData} />
-          <div className="h-4 bg-gray-400" />
+            <MenuItem onClick={(e: any) => HandleChangeStatus("a")}>
+              Additions
+            </MenuItem>
+            <MenuItem onClick={(e: any) => HandleChangeStatus("d")}>
+              Deletion
+            </MenuItem>
+            <MenuItem onClick={(e: any) => HandleChangeStatus("c")}>
+              Commits
+            </MenuItem>
+          </Popover>
           <div className="py-2">
-            {/* <HighchartsReact
+            <HighchartsReact
               className="h-full"
               highcharts={Highcharts}
               options={optionsContri}
-            /> */}
+            />
           </div>
+          <Button
+            aria-describedby={"1"}
+            variant="contained"
+            onClick={() => setOpen(true)}
+          >
+            Activity
+          </Button>
+          <LineChart weeklyData={weeklyData} changeData={changeData} />
+          <div className="h-4 bg-gray-400" />
         </div>
       ) : null}
     </div>

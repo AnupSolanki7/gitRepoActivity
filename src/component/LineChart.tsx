@@ -1,8 +1,8 @@
 import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts";
-import React from "react";
 
-const LineChart = ({ weeklyData }: any) => {
+
+const LineChart = ({ weeklyData, changeData }: any) => {
   const weekData = weeklyData?.map((e: any) => e.weeks);
 
   const options = {
@@ -22,8 +22,13 @@ const LineChart = ({ weeklyData }: any) => {
     },
     series: [
       {
-        data: weekData?.[0]?.map((e: any) => e.a),
+        name:"total",
+        data: weeklyData?.map((e:any) => e.total),
       },
+      {
+        name:`${changeData}`,
+        data: weekData?.[0]?.map((e: any) => e[changeData])
+      }
     ],
   };
   return (
